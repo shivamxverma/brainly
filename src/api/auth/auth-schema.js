@@ -1,0 +1,26 @@
+import { z } from "zod";
+
+export const EmailPasswordRegisterSchema = z.object({
+  fullName: z
+    .string()
+    .min(3, "Name too short")
+    .max(50, "Name too long"),
+
+  email: z
+    .string()
+    .email("Invalid email"),
+
+  password: z
+    .string()
+    .min(8, "Password must be at least 6 chars"),
+});
+
+
+export const EmailPasswordLoginSchema = z.object({
+  email: z
+    .string()
+    .email("Invalid email"),
+
+  password: z.string()
+});
+
