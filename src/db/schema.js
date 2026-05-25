@@ -69,6 +69,16 @@ const linkSchema = new Schema(
       default: false,
     },
 
+    isShare: {
+      type: Boolean,
+      default: true
+    },
+
+    shareHash: {
+      type: String,
+      default : false
+    },
+
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",

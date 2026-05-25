@@ -1,4 +1,5 @@
 import { Link } from "../../db/schema.js";
+import crypto from 'crypto';
 
 export const handleCreateLink = async (linkData, user) => {
     try {
@@ -77,3 +78,47 @@ export const updateFavorite = async (linkId, favorite) => {
         throw error;
     }
 };
+
+export const handleCreateShareLink = async(linkId) => {
+    try {
+        const link = await Link.findById(linkId);
+        if (!link) {
+            throw new Error("Link not found");
+        }
+
+        if (!link.isShare) {
+            throw new Error("Sharing is not enabled for this link");
+        }
+
+        // https://example.com/share/6a144975-f068-8321-9b5f-63846995d772
+        const hash = crypto.randomBytes(32).toString('hex');
+
+        const shareLink = `${process.env.CLIENT_URL}/share/${hash}`;
+
+        await Link.findByIdAndUpdate(
+            linkId,
+            {
+                shareHash : hash
+            }
+        );
+
+        return shareLink;
+    } catch (error) {
+        console.error("Error on updating Share Link:", error.message);
+        throw error;
+    }
+}
+
+export const handleShareLink = async(shareHash) => {
+    try {
+        const link = await Link.findOne({
+            shareHash : shareHash,
+            isShare: true
+        });
+
+        return link;
+    } catch (error) {
+        console.error("Error on sharing Link:", error.message);
+        throw error;
+    }
+}

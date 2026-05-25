@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {EmailPasswordRegister, EmailPasswordLogin} from './auth-controller.js';
 import {EmailPasswordRegisterSchema, EmailPasswordLoginSchema} from './auth-schema.js';
-import validate from '../shared/validate';
+import validate from '../../shared/validate.js';
 
 const router = Router();
 
