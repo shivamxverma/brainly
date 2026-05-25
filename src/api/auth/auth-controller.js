@@ -1,24 +1,39 @@
 import {handleEmaiPasswordRegister, handleEmailPasswordLogin} from './auth-helper.js';
-import {options} from './auth-service.js';
+import {cookieOptions} from './auth-service.js';
 
-export function EmailPasswordRegister(req,res) {
-    const response = handleEmaiPasswordRegister(req.body);
+export async function EmailPasswordRegister(req, res) {
+    try {
+        const response = await handleEmaiPasswordRegister(req.body);
 
-    return res.status(200).json({
-        message : "User Successfully Registered",
-        success : true,
-        data : response
-    })
+        return res.status(201).json({
+            message : "User Successfully Registered",
+            success : true,
+            data : response
+        })
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message || "Registration failed",
+            success: false
+        });
+    }
 }
 
-export function EmailPasswordLogin(req, res) {
-    const response = handleEmailPasswordLogin(req.body);
+export async function EmailPasswordLogin(req, res) {
+    try {
+        const response = await handleEmailPasswordLogin(req.body);
 
-    res.cookie(response.accessToken, 'accessToken', options());
-    res.cookie(response.refreshToken, 'refreshToken', options());
-    return res.status(200).json({
-        message : "User Successfully Logged In",
-        success : true,
-        data : response
-    })
+        res.cookie('accessToken', response.accessToken, cookieOptions());
+        res.cookie('refreshToken', response.refreshToken, cookieOptions());
+        
+        return res.status(200).json({
+            message : "User Successfully Logged In",
+            success : true,
+            data : response
+        })
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message || "Login failed",
+            success: false
+        });
+    }
 }

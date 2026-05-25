@@ -19,9 +19,9 @@ const accessTokenSecret = () => {
     return process.env.ACCESS_TOKEN_SECRET;
 }
 
-export const returnTokens = async(payload) => {
-    const accessToken = await jwt.sign(payload,accessTokenSecret, {expiresIn: "15m"});
-    const refreshToken = await jwt.sign(payload,refreshTokenSecret, {expiresIn: "7d"});
+export const returnTokens = async (payload) => {
+    const accessToken = jwt.sign(payload, accessTokenSecret(), { expiresIn: "15m" });
+    const refreshToken = jwt.sign(payload, refreshTokenSecret(), { expiresIn: "7d" });
 
     return {
         accessToken,

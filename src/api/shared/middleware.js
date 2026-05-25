@@ -1,27 +1,34 @@
-import { User } from "../../db/schema";
+import jwt from "jsonwebtoken";
+import { User } from "../../db/schema.js";
 
-export const verifyJWT = asyncHandler(async (req, res, next) => {
+export const verifyJWT = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.startsWith('Bearer ')
             ? req.headers.authorization.split(' ')[1]
             : req.cookies?.token;
 
         if (!token) {
-            throw new ApiError('Unauthorized Request: No token provided', httpStatus.UNAUTHORIZED);
+            return res.status(401).json({
+                status: 'error',
+                message: 'Unauthorized Request: No token provided'
+            });
         }
 
-        const decodedToken = jwt.verify(token, env.ACCESS_TOKEN_SECRET);
-        const users = await User.findOne({ ObjectId: decodedToken._id });
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const user = await User.findById(decodedToken._id);
 
-        if (!users || users.length === 0) {
-            throw new ApiError('Invalid Access Token', httpStatus.UNAUTHORIZED);
+        if (!user) {
+            return res.status(401).json({
+                status: 'error',
+                message: 'Invalid Access Token'
+            });
         }
 
-        req.user = users;
+        req.user = user;
         next();
     } catch (error) {
-        const statusCode = error instanceof ApiError ? error.statusCode : (error.name === 'JsonWebTokenError' ? 401 : 500);
-        const message = error instanceof ApiError ? error.message : (error.name === 'JsonWebTokenError' ? 'Invalid token' : 'Internal Server Error');
+        const statusCode = error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError' ? 401 : 500;
+        const message = error.name === 'JsonWebTokenError' ? 'Invalid token' : (error.name === 'TokenExpiredError' ? 'Token expired' : 'Internal Server Error');
 
         console.error('JWT Verification Error:', error.message || error);
 
@@ -30,4 +37,4 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
             message
         });
     }
-});
+};
