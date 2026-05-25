@@ -10,6 +10,7 @@ const port = process.env.PORT;
 
 connectDB()
     .then(() => {
+        app.use(express.json());
         app.use(router);
         app.listen(port, () => {
             console.log(`Server is started at ${port}`);
